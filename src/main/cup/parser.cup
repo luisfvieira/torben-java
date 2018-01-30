@@ -57,26 +57,72 @@ non terminal Exp program;
 non terminal Exp exp;
 non terminal List<Exp> exps, expsRest;
 
-precedence left PLUS;
+precedence right THEN, ELSE, DO, IN;
+precedence right ASSIGN;
+precedence left OR;
+precedence left AND;
+precedence left EQ, NE, GT, GE, LT, LE;
+precedence left PLUS, MINUS;
+precedence left TIMES, DIV, MOD;
+precedence left UMINUS;
+precedence left LPAREN, RPAREN;
 
 start with program;
 
 program ::=
-  exp:x                    {: RESULT = x; :}
+  exp:x                             {: RESULT = x; :}
 ;
 
 exp ::=
-  LITINT:x                 {: RESULT = new ExpInt(loc(xxleft,xxright), new Integer(x)); :}
-| exp:x PLUS exp:y         {: RESULT = new ExpBin(loc(xxleft,yxright), ExpBin.Operator.PLUS, x, y); :}
-| LPAREN:l exps:s RPAREN:r {: RESULT = new ExpSeq(loc(lxleft,rxright), s); :}
+  LITBOOL:x                         {: RESULT = new ExpBool(loc(xxleft,xxright), new Boolean(x)); :}
+| LITINT:x                          {: RESULT = new ExpInt(loc(xxleft,xxright), new Integer(x)); :}
+| LITSTRING:x                       {: RESULT = new ExpString(loc(xxleft, xxright), new String(x)); :}
+| ID:x                              {: RESULT = new ExpId(loc(xxleft, xxright), new String(x)); :}
+| ID:x ASSIGN exp:y                 {: RESULT = new ExpAssign(loc(xxleft, yxright), new String(x), y); :}
+| exp:x PLUS exp:y                  {: RESULT = new ExpBin(loc(xxleft, yxright), ExpBin.Operator.PLUS, x, y); :}
+| exp:x MINUS exp:y                 {: RESULT = new ExpBin(loc(xxleft, yxright), ExpBin.Operator.MINUS, x, y); :}
+| exp:x TIMES exp:y                 {: RESULT = new ExpBin(loc(xxleft, yxright), ExpBin.Operator.TIMES, x, y); :}
+| exp:x DIV exp:y                   {: RESULT = new ExpBin(loc(xxleft, yxright), ExpBin.Operator.DIV, x, y); :}
+| exp:x MOD exp:y                   {: RESULT = new ExpBin(loc(xxleft, yxright), ExpBin.Operator.MOD, x, y); :}
+| UMINUS exp:x                      {: RESULT = new ExpUn(loc(xxleft, xxright), x); :}
+| exp:x EQ exp:y                    {: RESULT = new ExpBin(loc(xxleft, yxright), ExpBin.Operator.EQ, x, y); :}
+| exp:x NE exp:y                    {: RESULT = new ExpBin(loc(xxleft, yxright), ExpBin.Operator.NE, x, y); :}
+| exp:x GT exp:y                    {: RESULT = new ExpBin(loc(xxleft, yxright), ExpBin.Operator.GT, x, y); :}
+| exp:x GE exp:y                    {: RESULT = new ExpBin(loc(xxleft, yxright), ExpBin.Operator.GE, x, y); :}
+| exp:x LT exp:y                    {: RESULT = new ExpBin(loc(xxleft, yxright), ExpBin.Operator.LT, x, y); :}
+| exp:x LE exp:y                    {: RESULT = new ExpBin(loc(xxleft, yxright), ExpBin.Operator.LE, x, y); :}
+| exp:x AND exp:y                   {: RESULT = new ExpBin(loc(xxleft, yxright), ExpBin.Operator.AND, x, y); :}
+| exp:x OR exp:y                    {: RESULT = new ExpBin(loc(xxleft, yxright), ExpBin.Operator.OR, x, y); :}
+| LPAREN:l exps:s RPAREN:r          {: RESULT = new ExpSeq(loc(lxleft, rxright), s); :}
+| ID:x                              {: RESULT = new ExpVar(loc(xxleft, xxright), x); :}
+| IF exp:x THEN exp:t ELSE exp:f    {: RESULT = new ExpIf(loc(xxleft,fxright), x, t, f); :}
+| WHILE exp:x DO exp:y              {: RESULT = new ExpWhile(loc(xxleft, yxright), x, y); :}
+| LET:l ID:v EQ exp:i IN exp:b      {: RESULT = new ExpLet(loc(lxleft, bxright), v, i, b); :}
+| ID:f LPAREN exps:a RPAREN:r       {: RESULT = new ExpCall(loc(fxleft, rxright), f, a); :}
 ;
 
 exps ::=
-  /* empty */              {: RESULT = List.empty(); :}
-| exp:x expsRest:xs        {: RESULT = xs.prepend(x); :}
+  /* empty */                       {: RESULT = List.empty(); :}
+| exp:x expsRest:xs                 {: RESULT = xs.prepend(x); :}
 ;
 
 expsRest ::=
-  /* empty */              {: RESULT = List.empty(); :}
-| COMMA exp:x expsRest:xs  {: RESULT = xs.prepend(x); :}
+  /* empty */                       {: RESULT = List.empty(); :}
+| COMMA exp:x expsRest:xs           {: RESULT = xs.prepend(x); :}
 ;
+//
+//typeId ::=
+// BOOL  {::}
+//| INT       {::}
+//| STRING    {::}
+//;
+
+//typeIdsRest ::=
+//  /* empty */                       {: RESULT = List.empty(); :}
+//| COMMA typeid:x typeidrest:xs      {: RESULT = xs.prepend(x); :}
+//;
+//
+//typeIds ::=
+//  /* empty */                       {: RESULT = List.empty(); :}
+//  typeId:x typeIdsRest:y            {::}
+//;

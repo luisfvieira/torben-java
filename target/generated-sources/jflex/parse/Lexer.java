@@ -874,7 +874,7 @@ public final class Lexer implements Terminals, java_cup.runtime.Scanner {
             }
           case 82: break;
           case 33: 
-            { error("invalid escape sequence in string literal");
+            { error("invalid escape arguments in string literal");
             }
           case 83: break;
           case 34: 
