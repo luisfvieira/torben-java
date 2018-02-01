@@ -1,7 +1,10 @@
 package absyn;
 
+import env.Env;
 import io.vavr.collection.Tree;
 import parse.Loc;
+import types.BOOL;
+import types.Type;
 
 public class ExpIf extends Exp {
     public final Exp ifExp;
@@ -18,5 +21,10 @@ public class ExpIf extends Exp {
     @Override
     public Tree.Node<String> toTree() {
         return Tree.of(annotateType("ExpIf: "), ifExp.toTree());
+    }
+
+    @Override
+    protected Type semantic_(Env env) {
+        return BOOL.T;
     }
 }
