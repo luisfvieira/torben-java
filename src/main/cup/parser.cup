@@ -61,10 +61,10 @@ precedence right THEN, ELSE, DO, IN;
 precedence right ASSIGN;
 precedence left OR;
 precedence left AND;
-precedence left EQ, NE, GT, GE, LT, LE;
+precedence nonassoc EQ, NE, GT, GE, LT, LE;
 precedence left PLUS, MINUS;
 precedence left TIMES, DIV, MOD;
-precedence left UMINUS;
+precedence nonassoc UMINUS;
 precedence left LPAREN, RPAREN;
 
 start with program;
@@ -94,7 +94,6 @@ exp ::=
 | exp:x AND exp:y                   {: RESULT = new ExpBin(loc(xxleft, yxright), ExpBin.Operator.AND, x, y); :}
 | exp:x OR exp:y                    {: RESULT = new ExpBin(loc(xxleft, yxright), ExpBin.Operator.OR, x, y); :}
 | LPAREN:l exps:s RPAREN:r          {: RESULT = new ExpSeq(loc(lxleft, rxright), s); :}
-| ID:x                              {: RESULT = new ExpVar(loc(xxleft, xxright), x); :}
 | IF exp:x THEN exp:t ELSE exp:f    {: RESULT = new ExpIf(loc(xxleft,fxright), x, t, f); :}
 | WHILE exp:x DO exp:y              {: RESULT = new ExpWhile(loc(xxleft, yxright), x, y); :}
 | LET:l ID:v EQ exp:i IN exp:b      {: RESULT = new ExpLet(loc(lxleft, bxright), v, i, b); :}
@@ -110,11 +109,11 @@ expsRest ::=
   /* empty */                       {: RESULT = List.empty(); :}
 | COMMA exp:x expsRest:xs           {: RESULT = xs.prepend(x); :}
 ;
-//
+
 //typeId ::=
-// BOOL  {::}
-//| INT       {::}
-//| STRING    {::}
+// BOOL:x ID:y {::}
+//| INT:x ID:y      {::}
+//| STRING:x ID:y   {::}
 //;
 
 //typeIdsRest ::=
